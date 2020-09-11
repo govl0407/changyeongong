@@ -17,7 +17,6 @@ void loop() {
   Serial.println(toggle);
   digitalWrite(PIN_LED, toggle);
   delay(1000);
-  
 }
 int toggle_state(int toggle){
   if (count % 2 ==0){
