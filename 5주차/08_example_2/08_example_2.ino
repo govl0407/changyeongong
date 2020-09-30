@@ -11,7 +11,7 @@
 
 // global variables
 float timeout; // unit: us
-float dist_min, dist_max, dist_raw,DIST; // unit: mm
+float dist_min, dist_max, dist_raw,DIST, save; // unit: mm
 unsigned long last_sampling_time; // unit: ms
 float scale; // used for pulse duration to distance conversion
 
@@ -28,6 +28,7 @@ void setup() {
   timeout = (INTERVAL / 2) * 1000.0; // precalculate pulseIn() timeout value. (unit: us)
   dist_raw = 0.0; // raw distance output from USS (unit: mm)
   scale = 0.001 * 0.5 * SND_VEL;
+  save = 200.0;
 
 // initialize serial port
   Serial.begin(57600);
@@ -52,19 +53,25 @@ void loop() {
   Serial.println("Max:400");
 
 // turn on the LED if the distance is between dist_min and dist_max
-  if(dist_raw < 100 || dist_raw > 300) {
-    analogWrite(PIN_LED, 255);
+  if (dist_raw == 0){
+    dist_raw = save;    
   }
-  else if(dist_raw == 200) {
-    analogWrite(PIN_LED, 0);
-  }else{
-    DIST = dist_raw -200;
-    if(DIST <100){
-      DIST=-DIST/100;
-      analogWrite(PIN_LED, 255*DIST);
+  else{
+    save = dist_raw;
+    if(dist_raw < 100 || dist_raw > 300) {
+      analogWrite(PIN_LED, 255);
+    }
+    else if(dist_raw == 200) {
+      analogWrite(PIN_LED, 0);
     }else{
-      DIST= DIST/100;
-      analogWrite(PIN_LED, 255*DIST);
+      DIST = dist_raw -200;
+      if(DIST <100){
+        DIST=-DIST/100;
+        analogWrite(PIN_LED, 255*DIST+1);
+      }else{
+        DIST= DIST/100;
+        analogWrite(PIN_LED, 255*DIST+1);
+      }
     }
   }
 

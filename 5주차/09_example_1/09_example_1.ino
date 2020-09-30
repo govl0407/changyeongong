@@ -28,6 +28,8 @@ void setup() {
   alpha = _DIST_ALPHA;
   timeout = (INTERVAL / 2) * 1000.0; // precalculate pulseIn() timeout value. (unit: us)
   dist_raw = 0.0; // raw distance output from USS (unit: mm)
+  dist_ema = 0.0;
+  alpha = 0.1;
   scale = 0.001 * 0.5 * SND_VEL;
 
 // initialize serial port
@@ -45,8 +47,8 @@ void loop() {
 // get a distance reading from the USS
   dist_raw = USS_measure(PIN_TRIG,PIN_ECHO);
   
-  EMA = 
-  dist_ema = dist_raw;
+  
+  dist_ema = alpha * dist_raw +(1-alpha)*dist_ema;
 
 // output the read value to the serial port
   Serial.print("Min:0,");
@@ -81,9 +83,4 @@ float USS_measure(int TRIG, int ECHO)
   reading = pulseIn(ECHO, HIGH, timeout) * scale; // unit: mm
   if(reading < dist_min || reading > dist_max) reading = 0.0; // return 0 when out of range.
   return reading;
-}
-float EMA_cal(raw, float alph, EMA){
-  EMA = alph * dist_raw +(1-alph)*
-
-}
 }
