@@ -3,19 +3,19 @@
 
 void setup()
 {
-  pinMode(9, OUTPUT); // analog output
+  pinMode(7, OUTPUT); // analog output
 }
 
 void loop()
 {
-  int period= 10000;
+  int period= 1000;
   int duty = 100;
   for(int i=0; i<=255*(duty/100); i++){
-    analogWrite(9, i);
+    analogWrite(7, i);
     delayMicroseconds(period);
   }
   for(int i=255*(duty/100); i>=0; i--){
-    analogWrite(9, i);
+    analogWrite(7, i);
     delayMicroseconds(period);
   }
 }
