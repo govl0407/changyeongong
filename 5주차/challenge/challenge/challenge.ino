@@ -12,10 +12,17 @@
 
 // global variables
 float timeout; // unit: us
-int N;
 float dist_min, dist_max, dist_raw, dist_ema, alpha; // unit: mm
 unsigned long last_sampling_time; // unit: ms
 float scale; // used for pulse duration to distance conversion
+int N=10;
+//for문 error 해결시 for{float list , sorted list}로 변경하기
+float list3[]={0.0,0.0,0.0};
+float sorted_list3[]={0.0,0.0,0.0};
+float list10[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float sorted_list10[]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float list30[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+float sorted_list30[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 void setup() {
 // initialize GPIO pins
   pinMode(PIN_LED,OUTPUT);
@@ -32,11 +39,7 @@ void setup() {
   dist_ema = 0.0;
   alpha = 0.1;
   scale = 0.001 * 0.5 * SND_VEL;
-  N = 15;
-  float list[N];
-  for(int i=0; i<N; i++){
-    list[i] = 0.0;
-  }
+
 // initialize serial port
   Serial.begin(57600);
 
@@ -51,18 +54,42 @@ void loop() {
 
 // get a distance reading from the USS
   dist_raw = USS_measure(PIN_TRIG,PIN_ECHO);
-  
-  
-  dist_ema = alpha * dist_raw +(1-alpha)*dist_ema;
+  if(N==3){
+    for(int i = 0; i<N; i++){
+      list3[i]=list3[i+1];
+    }
+    list3[N] = dist_raw;
+    int k = ((N+1)/2)-1;
+    float median = list3[k];
+  }
+  else if(N==10){
+    for(int i = 0; i<N; i++){
+      list10[i]=list10[i+1];
+    }
+    list10[N] = dist_raw;
+    int k = ((N+1)/2)-1;
+    float median = list10[k];
+  }
+  else if(N==30){
+    for(int i = 0; i<N; i++){
+      list30[i]=list30[i+1];
+    }
+    list30[N] = dist_raw;
+    int k = ((N+1)/2)-1;
+    float median = list30[k];
+  }
+  //list[N] = dist_raw;
+  int k = ((N+1)/2)-1;
+  float median = list[k];
+  //dist_ema = alpha * dist_raw +(1-alpha)*dist_ema;
 
 // output the read value to the serial port
   Serial.print("Min:0,");
   Serial.print("raw:");
   Serial.print(dist_raw);
   Serial.print(",");
-  Serial.print("ema:");
-  Serial.print(dist_ema);
-//  Serial.print(map(dist_ema,0,400,100,500));
+  Serial.print("median:");
+  Serial.print(map(median,0,400,100,500));
   Serial.print(",");
   Serial.println("Max:500");
 
