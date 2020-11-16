@@ -80,7 +80,7 @@ void loop() {
   }
   //list[N] = dist_raw;
   int k = ((N+1)/2)-1;
-  float median = list[k];
+  float median = list30[k];
   //dist_ema = alpha * dist_raw +(1-alpha)*dist_ema;
 
 // output the read value to the serial port
