@@ -35,8 +35,8 @@ void setup() {
 // initialize GPIO pins
   myservo.attach(PIN_SERVO); 
   myservo.writeMicroseconds(1700);
-  a = 79;
-  b = 350;
+  a = 78;
+  b = 385;
 // initialize serial port
   Serial.begin(57600);
   last_sampling_time = 0;
@@ -91,18 +91,17 @@ void loop() {
   float raw_dist = ir_distance();
   float dist_cali = 100 + 300.0 / (b - a) * (raw_dist - a);
   float filtered_dist = filter(dist_cali);
-  Serial.print("min:0,max:500,dist:");
-  Serial.print(raw_dist);
-  Serial.print(",dist_cali:");
-  Serial.println(dist_cali);
-  Serial.print(",filter:");
-  Serial.print(filtered_dist);
-  Serial.print("servo:");
-  Serial.print(myservo.read());
-  
-  if(dist_cali <= 300 && dist_cali >=225 ) myservo.writeMicroseconds(1560);
-  else if(dist_cali > 300) myservo.writeMicroseconds(1560- (dist_cali-300));
-  else if(dist_cali < 225) myservo.writeMicroseconds(1560 +(225- dist_cali));
+  Serial.print("dist_ir:");
+  Serial.print(dist_cali);
+  Serial.print(",pterm:");
+  Serial.print(520+230-dist_cali);//map(pterm,-1000,1000,510,610));
+  Serial.print(",duty_target:");
+  Serial.print(map(duty_target,1000,2000,410,510));
+  Serial.print(",duty_curr:");
+  Serial.print(map(duty_curr,1000,2000,410,510));
+  Serial.println(",Min:100,Low:200,dist_target:230,High:310,Max:410");
+  if(dist_cali > 230) myservo.writeMicroseconds(1530- (dist_cali-230)*2);
+  else if(dist_cali <= 230) myservo.writeMicroseconds(1530 +(230- dist_cali)*2);
   delay(20);
   myservo.attach(PIN_SERVO); 
 

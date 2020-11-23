@@ -23,7 +23,7 @@ void setup() {
 // initialize serial port
   Serial.begin(57600);
   a = 78;
-  b = 350;
+  b = 385;
 }
 float ir_distance(void){ // return value unit: mm
   float val;
@@ -45,7 +45,7 @@ void loop() {
   else digitalWrite(PIN_LED, 255);
   delay(20);
   myservo.attach(PIN_SERVO); 
-  myservo.writeMicroseconds(1580);
+  myservo.writeMicroseconds(1610);
 
 
 }
