@@ -33,3 +33,6 @@ void setup() {
   Serial.begin(57600);
   last_sampling_time = 0;
 }
+void loop(){
+
+}
