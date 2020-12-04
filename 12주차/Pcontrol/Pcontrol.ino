@@ -91,19 +91,43 @@ void loop() {
   float raw_dist = ir_distance();
   float dist_cali = 100 + 300.0 / (b - a) * (raw_dist - a);
   float filtered_dist = filter(dist_cali);
-  Serial.print("dist_ir:");
-  Serial.print(dist_cali);
-  Serial.print(",pterm:");
-  Serial.print(520+230-dist_cali);//map(pterm,-1000,1000,510,610));
-  Serial.print(",duty_target:");
-  Serial.print(map(duty_target,1000,2000,410,510));
-  Serial.print(",duty_curr:");
-  Serial.print(map(duty_curr,1000,2000,410,510));
+  //Serial.print("dist_ir:");
+  //Serial.print(dist_cali);
+  float filtered_cali_dist;
+  filtered_cali_dist = 100 + 300.0 / (315 - 88) * (-filtered_dist - 88);
+  Serial.print("filtered_dist:");
+  Serial.print(filtered_cali_dist);
+  //Serial.print(",pterm:");
+  //Serial.print(520+230-dist_cali);//map(pterm,-1000,1000,510,610));
   Serial.println(",Min:100,Low:200,dist_target:230,High:310,Max:410");
-  if(dist_cali > 230) myservo.writeMicroseconds(1530- (dist_cali-230)*2);
-  else if(dist_cali <= 230) myservo.writeMicroseconds(1530 +(230- dist_cali)*2);
+  if(filtered_cali_dist > 240) myservo.writeMicroseconds(1500- (filtered_cali_dist-240)*2);
+  else if(filtered_cali_dist <= 240) myservo.writeMicroseconds(1500 +(240- filtered_cali_dist)*2);
   delay(20);
   myservo.attach(PIN_SERVO); 
 
 
 }
+/*
+void loop() {
+  float raw_dist = ir_distance();
+  float dist_cali = 100 + 300.0 / (b - a) * (raw_dist - a);
+  float filtered_dist = filter(dist_cali);
+  filtered_dist = 100 + 300.0 / (315 - 88) * (-filtered_dist - 88);
+  Serial.print("filtered_dist:");
+  Serial.print(filtered_dist);
+  Serial.print("dist_cali:");
+  Serial.print(dist_cali);
+  //Serial.print(",pterm:");
+  //Serial.print((filtered_dist-240));//map(pterm,-1000,1000,510,610));
+  //Serial.print(",duty_target:");
+  //Serial.print(map(duty_target,1000,2000,410,510));
+  //Serial.print(",duty_curr:");
+  //Serial.print(map(duty_curr,1000,2000,410,510));
+  Serial.println(",Min:100,Low:200,dist_target:230,High:310,Max:410");
+  if(filtered_dist > 240) myservo.writeMicroseconds(1500- (filtered_dist-240)*2);
+  else if(filtered_dist <= 240) myservo.writeMicroseconds(1500 +(240- filtered_dist)*2);
+  delay(20);
+  myservo.attach(PIN_SERVO); 
+
+
+}*/

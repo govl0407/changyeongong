@@ -12,12 +12,12 @@ float raw_dist;
 float dist_target; // location to send the ball
 //===================================================
 // 코드를 작동시키기 전에 _DUTY_NEU의 값을 각자의 중립위치각도로 수정 후 사용!!!
-#define _DUTY_NEU 1420 // neutral position
+#define _DUTY_NEU 1400 // neutral position
 //===================================================
 #define _INTERVAL_DIST 30   // USS interval (unit: ms)
 #define _INTERVAL_SERVO 20 // [3401] 서보를 20ms마다 조작하기
 #define _INTERVAL_SERIAL 30 // serial interval (unit: ms)
-#define _DIST_TARGET 255  //[3166]목표로 하는 탁구공 중심 위치까지 거리255mm로 고정
+#define _DIST_TARGET 200  //[3166]목표로 하는 탁구공 중심 위치까지 거리255mm로 고정
 #define _DIST_MIN 10                       //[3164] 최소 측정 거리 10mm로 고정 
 #define _DIST_MAX 410   // [3401] 측정 거리의 최댓값를 410mm로 설정
 #define _DUTY_MIN 1000    //[3148]  서보의 가동 최소 각도(0)
@@ -27,8 +27,8 @@ float dist_target; // location to send the ball
 #define _SERVO_ANGLE 30   //[3159] 서보의 각도(30º) 
 //[3150] 레일플레이트가 사용자가 원하는 가동범위를 움직일때, 이를 움직이게 하는 서보모터의 가동범위
 #define _SERVO_SPEED 800//150             //[3147]  서보 속도를 30으로 설정
-#define KP 2.0
-#define KD 22.0// [3158] 비례상수 설정
+#define KP 2.5
+#define KD 105//22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
 #define INTERVAL 10.0
 float filtered_dist, filtered_cali_dist;
 float ema_dist = 0;
@@ -133,7 +133,7 @@ void loop() {
     //control = pterm;           // [3158] P제어 이기때문에 pterm만 있음
     //===============================================
     dterm = KD * (error_curr - error_prev); // 미분제어
-    control = dterm;
+    control = dterm + pterm;
     duty_target = _DUTY_NEU + control;
     // Limit duty_target within the range of [_DUTY_MIN, _DUTY_MAX]
     if(duty_target < _DUTY_MIN) duty_target = _DUTY_MIN; // lower limit
@@ -146,18 +146,17 @@ void loop() {
     event_serial = false;
     // output the read value to the serial port
     Serial.print("dist_ir:");
-    Serial.print(raw_dist);
-    Serial.print(", filtered_dist:");
-    Serial.print(filtered_cali_dist);
-    //Serial.print(",pterm:");
-    //Serial.print(map(pterm, -1000, 1000, 510, 610));
+    Serial.print(filtered_dist);
+    Serial.print(",pterm:");
+    Serial.print(map(pterm,-1000,1000,510,610));
     Serial.print(",dterm:");
     Serial.print(map(dterm,-1000,1000,510,610));
     Serial.print(",duty_target:");
-    Serial.print(map(duty_target, 1000, 2000, 410, 510));
+    Serial.print(map(duty_target,1000,2000,410,510));
     Serial.print(",duty_curr:");
-    Serial.print(map(duty_curr, 1000, 2000, 410, 510));
+    Serial.print(map(duty_curr,1000,2000,410,510));
     Serial.println(",Min:100,Low:200,dist_target:255,High:310,Max:410");
+
     
   }
 }
