@@ -12,7 +12,7 @@ float raw_dist;
 float dist_target; // location to send the ball
 //===================================================
 // 코드를 작동시키기 전에 _DUTY_NEU의 값을 각자의 중립위치각도로 수정 후 사용!!!
-#define _DUTY_NEU 1400 // neutral position
+#define _DUTY_NEU 1600 // neutral position
 //===================================================
 #define _INTERVAL_DIST 30   // USS interval (unit: ms)
 #define _INTERVAL_SERVO 20 // [3401] 서보를 20ms마다 조작하기
@@ -29,6 +29,7 @@ float dist_target; // location to send the ball
 #define _SERVO_SPEED 800//150             //[3147]  서보 속도를 30으로 설정
 #define KP 2.5
 #define KD 95//22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
+float KI= 0.01;
 #define INTERVAL 10.0
 float filtered_dist, filtered_cali_dist;
 float ema_dist = 0;
@@ -133,7 +134,8 @@ void loop() {
     //control = pterm;           // [3158] P제어 이기때문에 pterm만 있음
     //===============================================
     dterm = KD * (error_curr - error_prev); // 미분제어 
-    control = dterm + pterm;
+    iterm +=  KI * error_curr; //
+    control = dterm + pterm +iterm;
     duty_target = _DUTY_NEU + control;
     // Limit duty_target within the range of [_DUTY_MIN, _DUTY_MAX]
     if(duty_target < _DUTY_MIN) duty_target = _DUTY_MIN; // lower limit
@@ -145,7 +147,10 @@ void loop() {
   if (event_serial) {
     event_serial = false;
     // output the read value to the serial port
-    Serial.print("dist_ir:");
+    
+    /*
+      
+     Serial.print("dist_ir:");
     Serial.print(filtered_dist);
     Serial.print(",pterm:");
     Serial.print(map(pterm,-1000,1000,510,610));
@@ -156,6 +161,23 @@ void loop() {
     Serial.print(",duty_curr:");
     Serial.print(map(duty_curr,1000,2000,410,510));
     Serial.println(",Min:100,Low:200,dist_target:255,High:310,Max:410");
+*/
+
+    Serial.print("IR:");
+    Serial.print(filtered_dist);
+    Serial.print(",T:");
+    Serial.print(dist_target);
+    Serial.print(",P:");
+    Serial.print(map(pterm,-1000,1000,510,610));
+    Serial.print(",D:");
+    Serial.print(map(dterm,-1000,1000,510,610));
+    Serial.print(",I:");
+    Serial.print(map(iterm,-1000,1000,510,610));
+    Serial.print(",DTT:");
+    Serial.print(map(duty_target,1000,2000,410,510));
+    Serial.print(",DTC:");
+    Serial.print(map(duty_curr,1000,2000,410,510));
+    Serial.println(",-G:245,+G:265,m:0,M:800");
 
     
   }
