@@ -12,12 +12,14 @@ float raw_dist;
 float dist_target; // location to send the ball
 //===================================================
 // 코드를 작동시키기 전에 _DUTY_NEU의 값을 각자의 중립위치각도로 수정 후 사용!!!
-#define _DUTY_NEU 1600 // neutral position
+#define _DUTY_NEU 1370 // neutral position
 //===================================================
+
+
 #define _INTERVAL_DIST 30   // USS interval (unit: ms)
 #define _INTERVAL_SERVO 20 // [3401] 서보를 20ms마다 조작하기
 #define _INTERVAL_SERIAL 100 // serial interval (unit: ms)
-#define _DIST_TARGET 200  //[3166]목표로 하는 탁구공 중심 위치까지 거리255mm로 고정
+#define _DIST_TARGET 225 //[3166]목표로 하는 탁구공 중심 위치까지 거리255mm로 고정
 #define _DIST_MIN 10                       //[3164] 최소 측정 거리 10mm로 고정 
 #define _DIST_MAX 410   // [3401] 측정 거리의 최댓값를 410mm로 설정
 #define _DUTY_MIN 1000    //[3148]  서보의 가동 최소 각도(0)
@@ -27,9 +29,13 @@ float dist_target; // location to send the ball
 #define _SERVO_ANGLE 30   //[3159] 서보의 각도(30º) 
 //[3150] 레일플레이트가 사용자가 원하는 가동범위를 움직일때, 이를 움직이게 하는 서보모터의 가동범위
 #define _SERVO_SPEED 800//150             //[3147]  서보 속도를 30으로 설정
-#define KP 2.5
-#define KD 95//22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
-float KI= 0.01;
+#define _RAMPUP_TIME 360
+#define START _DUTY_MIN + 100
+#define END _DUTY_MAX - 100
+#define _ITERM_MAX 40
+#define KP 2
+#define KD 90//22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
+float KI= 0.017;// 0.01 = 범위에서 정지 x
 #define INTERVAL 10.0
 float filtered_dist, filtered_cali_dist;
 float ema_dist = 0;
@@ -79,8 +85,8 @@ void setup() {
   Serial.begin(57600);
   pinMode(PIN_LED, OUTPUT);
   myservo.attach(PIN_SERVO);
-  a = 90;
-  b = 488;
+  a = 83;
+  b = 495;
   myservo.writeMicroseconds(_DUTY_NEU);
   delay(1000);
   // initialize last sampling time
@@ -133,9 +139,19 @@ void loop() {
     
     //control = pterm;           // [3158] P제어 이기때문에 pterm만 있음
     //===============================================
-    dterm = KD * (error_curr - error_prev); // 미분제어 
+    dterm = KD * (error_curr - error_prev);// 미분제어
+    if(dterm>800){
+      dterm = 800; 
+    }
+    
     iterm +=  KI * error_curr; //
-    control = dterm + pterm +iterm;
+    if(abs(iterm) > _ITERM_MAX) iterm = 0;
+    if(iterm > _ITERM_MAX) iterm = _ITERM_MAX;
+    if(iterm < - _ITERM_MAX) iterm = - _ITERM_MAX; 
+    control = dterm +pterm+iterm;
+    
+    
+    
     duty_target = _DUTY_NEU + control;
     // Limit duty_target within the range of [_DUTY_MIN, _DUTY_MAX]
     if(duty_target < _DUTY_MIN) duty_target = _DUTY_MIN; // lower limit
@@ -148,8 +164,8 @@ void loop() {
     event_serial = false;
     // output the read value to the serial port
     
-    /*
-      
+    
+/*      
      Serial.print("dist_ir:");
     Serial.print(filtered_dist);
     Serial.print(",pterm:");
@@ -161,10 +177,10 @@ void loop() {
     Serial.print(",duty_curr:");
     Serial.print(map(duty_curr,1000,2000,410,510));
     Serial.println(",Min:100,Low:200,dist_target:255,High:310,Max:410");
-*/
 
+*/  
     Serial.print("IR:");
-    Serial.print(filtered_dist);
+    Serial.print(filtered_cali_dist);
     Serial.print(",T:");
     Serial.print(dist_target);
     Serial.print(",P:");
@@ -177,8 +193,8 @@ void loop() {
     Serial.print(map(duty_target,1000,2000,410,510));
     Serial.print(",DTC:");
     Serial.print(map(duty_curr,1000,2000,410,510));
-    Serial.println(",-G:245,+G:265,m:0,M:800");
+    Serial.println(",-G:250,+G:200,m:0,M:800");
 
-    
+  
   }
 }

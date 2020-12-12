@@ -45,7 +45,7 @@ void loop() {
   else digitalWrite(PIN_LED, 255);
   delay(20);
   myservo.attach(PIN_SERVO); 
-  myservo.writeMicroseconds(1600);
+  myservo.writeMicroseconds(1370);
 
 
 }
