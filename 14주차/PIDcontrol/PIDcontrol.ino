@@ -12,14 +12,14 @@ float raw_dist;
 float dist_target; // location to send the ball
 //===================================================
 // 코드를 작동시키기 전에 _DUTY_NEU의 값을 각자의 중립위치각도로 수정 후 사용!!!
-#define _DUTY_NEU 1370 // neutral position
+#define _DUTY_NEU 1350 // neutral position
 //===================================================
 
 
 #define _INTERVAL_DIST 30   // USS interval (unit: ms)
 #define _INTERVAL_SERVO 20 // [3401] 서보를 20ms마다 조작하기
 #define _INTERVAL_SERIAL 100 // serial interval (unit: ms)
-#define _DIST_TARGET 225 //[3166]목표로 하는 탁구공 중심 위치까지 거리255mm로 고정
+#define _DIST_TARGET 255 //[3166]목표로 하는 탁구공 중심 위치까지 거리255mm로 고정
 #define _DIST_MIN 10                       //[3164] 최소 측정 거리 10mm로 고정 
 #define _DIST_MAX 410   // [3401] 측정 거리의 최댓값를 410mm로 설정
 #define _DUTY_MIN 1000    //[3148]  서보의 가동 최소 각도(0)
@@ -32,10 +32,10 @@ float dist_target; // location to send the ball
 #define _RAMPUP_TIME 360
 #define START _DUTY_MIN + 100
 #define END _DUTY_MAX - 100
-#define _ITERM_MAX 40
+#define _ITERM_MAX 10
 #define KP 2
-#define KD 90//22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
-float KI= 0.017;// 0.01 = 범위에서 정지 x
+#define KD 105//22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
+float KI= 0.005;// 0.01 = 범위에서 탈출함
 #define INTERVAL 10.0
 float filtered_dist, filtered_cali_dist;
 float ema_dist = 0;
@@ -49,7 +49,8 @@ float ir_distance(void) { // return value unit: mm
   float val;
   float volt = float(analogRead(PIN_IR));
   val = ((6762.0 / (volt - 9.0)) - 4.0) * 10.0;
-  return val;
+  return val; 
+  
 }
 
 // ================
@@ -148,7 +149,8 @@ void loop() {
     if(abs(iterm) > _ITERM_MAX) iterm = 0;
     if(iterm > _ITERM_MAX) iterm = _ITERM_MAX;
     if(iterm < - _ITERM_MAX) iterm = - _ITERM_MAX; 
-    control = dterm +pterm+iterm;
+    //if(-20>error_curr&& error_curr>20) iterm = 0;
+    control = dterm +pterm + iterm;
     
     
     
@@ -193,7 +195,7 @@ void loop() {
     Serial.print(map(duty_target,1000,2000,410,510));
     Serial.print(",DTC:");
     Serial.print(map(duty_curr,1000,2000,410,510));
-    Serial.println(",-G:250,+G:200,m:0,M:800");
+    Serial.println(",-G:245,+G:265,m:0,M:800");
 
   
   }
