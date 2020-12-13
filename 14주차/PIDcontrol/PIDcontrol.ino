@@ -95,6 +95,7 @@ void setup() {
   event_dist = event_servo= event_serial = false;
   dist_target = _DIST_TARGET;
   duty_chg_per_interval = int((_DUTY_MAX - _DUTY_MIN) * (_SERVO_SPEED /  _SERVO_ANGLE) * (float(INTERVAL) / 1000.0));
+  iterm = 0;
 }
 
 void loop() {
