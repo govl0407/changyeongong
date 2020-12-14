@@ -12,7 +12,7 @@ float raw_dist;
 float dist_target; // location to send the ball
 //===================================================
 // 코드를 작동시키기 전에 _DUTY_NEU의 값을 각자의 중립위치각도로 수정 후 사용!!!
-#define _DUTY_NEU 1350 // neutral position
+#define _DUTY_NEU 1360 // neutral position
 //===================================================
 
 
@@ -32,10 +32,10 @@ float dist_target; // location to send the ball
 #define _RAMPUP_TIME 360
 #define START _DUTY_MIN + 100
 #define END _DUTY_MAX - 100
-#define _ITERM_MAX 1
+#define _ITERM_MAX 30
 #define KP 1.323
-#define KD 55//22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
-float KI= 0.001 ;// 0.01 = 범위에서 탈출함
+#define KD 53.2  ///22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
+float KI= 1 ;// 0.01 = 범위에서 탈출함
 #define INTERVAL 10.0
 float filtered_dist, filtered_cali_dist;
 float ema_dist = 0;
@@ -147,6 +147,7 @@ void loop() {
     }
     
     iterm +=  KI * error_curr; //
+    if(abs(iterm) > _ITERM_MAX) iterm = 0; 
     if(iterm > _ITERM_MAX) iterm = _ITERM_MAX;
     if(iterm < - _ITERM_MAX) iterm = - _ITERM_MAX; 
     control = dterm +pterm + iterm;
