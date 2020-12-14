@@ -32,10 +32,10 @@ float dist_target; // location to send the ball
 #define _RAMPUP_TIME 360
 #define START _DUTY_MIN + 100
 #define END _DUTY_MAX - 100
-#define _ITERM_MAX 10
-#define KP 2
-#define KD 105//22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
-float KI= 0.005;// 0.01 = 범위에서 탈출함
+#define _ITERM_MAX 1
+#define KP 1.323
+#define KD 55//22.0// 110 = 오버, 100 = 오버 or 크리티컬 70 = 언더 // [3158] 비례상수 설정
+float KI= 0.001 ;// 0.01 = 범위에서 탈출함
 #define INTERVAL 10.0
 float filtered_dist, filtered_cali_dist;
 float ema_dist = 0;
@@ -95,7 +95,7 @@ void setup() {
   event_dist = event_servo= event_serial = false;
   dist_target = _DIST_TARGET;
   duty_chg_per_interval = int((_DUTY_MAX - _DUTY_MIN) * (_SERVO_SPEED /  _SERVO_ANGLE) * (float(INTERVAL) / 1000.0));
-  iterm = 0;
+  pterm = iterm = dterm = 0;
 }
 
 void loop() {
@@ -147,10 +147,8 @@ void loop() {
     }
     
     iterm +=  KI * error_curr; //
-    if(abs(iterm) > _ITERM_MAX) iterm = 0;
     if(iterm > _ITERM_MAX) iterm = _ITERM_MAX;
     if(iterm < - _ITERM_MAX) iterm = - _ITERM_MAX; 
-    //if(-20>error_curr&& error_curr>20) iterm = 0;
     control = dterm +pterm + iterm;
     
     
